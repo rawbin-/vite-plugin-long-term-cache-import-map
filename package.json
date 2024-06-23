@@ -1,0 +1,69 @@
+{
+  "version": "0.1.2",
+  "name": "vite-plugin-long-term-cache-import-map",
+  "description": "vite plugin for long term cache by importmap",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rawbin-/vite-plugin-long-term-cache-import-map.git"
+  },
+  "exports": {
+    "./*": "./*",
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "coverage": "vitest --coverage",
+    "dev": "pnpm run build -- --watch",
+    "init:info": "plop --plopfile scripts/init.js",
+    "release": "bumpp --commit --push --tag && npm publish",
+    "play": "pnpm -C examples/vite run dev",
+    "play:open": "pnpm -C examples/vite run dev:open",
+    "play:host": "pnpm -C examples/vite run dev:host",
+    "play:build": "pnpm -C examples/vite run build",
+    "play:preview": "pnpm -C examples/vite run preview",
+    "play:preview:open": "pnpm -C examples/vite run preview:open",
+    "play:preview:host": "pnpm -C examples/vite run preview:host"
+  },
+  "keywords": [
+    "vite",
+    "rollup",
+    "plugin",
+    "template"
+  ],
+  "author": {
+    "name": "rawbin-",
+    "email": "fcrshjx44@gmail.com",
+    "url": "https://github.com/rawbin-"
+  },
+  "bugs": {
+    "email": "fcrshjx44@gmail.com",
+    "url": "https://github.com/rawbin-/vite-plugin-long-term-cache-import-map/issues"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^17.0.17",
+    "bumpp": "^7.1.1",
+    "c8": "^7.11.0",
+    "esno": "^0.14.1",
+    "plop": "^3.0.5",
+    "tsup": "^5.11.13",
+    "typescript": "^4.5.5",
+    "vite": "^2.8.1",
+    "vitest": "^0.1.27"
+  },
+  "dependencies": {
+    "rollup": "^4.18.0"
+  }
+}
