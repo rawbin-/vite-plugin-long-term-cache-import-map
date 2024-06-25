@@ -5,48 +5,45 @@ export const importMapGeneratorPlugin = ():Plugin => {
 	const importMap = {imports: {}};
 	return {
 		name: 'import-map-generator-plugin',
-		// @ts-ignore
-		renderChunk(code, chunk) {
-			const hashObj = createHash('md5');
-			hashObj.update(code);
-			const contentHash = chunk.fileName.replace(
-				/\.js$/,
-				`@${ hashObj.digest('hex').slice(0, 8) }.js`,
-			);
-			// @ts-ignore
-			importMap.imports['./' + chunk.fileName] = './' + contentHash;
-
-			this.emitFile({
-				type: 'asset',
-				// source: code,
-				// @ts-ignore
-				source: code.replace('__VITE_IS_MODERN__', true), // 这个地方加上本插件之后为啥就多了个这个玩意？
-				fileName: contentHash,
-			});
-		},
 		generateBundle(outputOpts, bundle) {
-			// 按上面renderChunk中的规则找到 /path/to/filename-xxyyhash.js
-			const neededJSFile = Object.keys(bundle).filter(fileName => /@\w{8}\.js$/.test(fileName))
+			Object.keys(bundle).forEach((fileName) => {
+				const fileObj = bundle[fileName];
+				// 删除默认的map文件 重新生成
+				if (fileName.endsWith('.js.map') && fileObj.type === 'asset') {
+					delete bundle[fileName]
+				}
+				if (fileName.endsWith('.js') && fileObj.type === 'chunk') {
 
-			const neededJSFilePrefixMap = neededJSFile.reduce((result, fileName) => {
-				const filePrefix = fileName.replace(/@\w{8}\.js$/, '');
-				// @ts-ignore
-				result[filePrefix] = fileName;
-				return result;
-			}, {})
-			// 算出 /path/to/filename.js.map 的hash
-			const neededJSFilePrefix = Object.keys(neededJSFilePrefixMap);
 
-			// 删除不必要的产物，删除之后会导致css无法加载?!
-			neededJSFilePrefix.map(filePrefix => {
-				delete bundle[`${ filePrefix }.js`];
-			})
+					const hashObj = createHash('md5');
+					hashObj.update(fileObj.code);
+					const hashStr = hashObj.digest('hex').slice(0, 8)
 
-			// 修正sourceMap的映射关系
-			neededJSFilePrefix.map(filePrefix => {
-				//@ts-ignore
-				bundle[`${ filePrefix }.js.map`].fileName = `${ neededJSFilePrefixMap[filePrefix] }.map`;
-			})
+					fileObj.code = fileObj.code.replace(`//# sourceMappingURL=${ fileObj.name }.js.map`, `//# sourceMappingURL=${ fileObj.name }@${ hashStr }.js.map`);
+
+					fileObj.fileName = fileObj.fileName.replace(/.js$/, `@${ hashStr }.js`);
+					// @ts-ignore
+					fileObj.preliminaryFileName = fileObj.preliminaryFileName.replace(/.js$/, `@${ hashStr }.js`);
+					// @ts-ignore
+					fileObj.map.file = fileObj.fileName.replace(/.js$/, `@${ hashStr }.js`);
+					// @ts-ignore
+					fileObj.sourcemapFileName = fileObj.sourcemapFileName.replace(/.js.map$/, `@${ hashStr }.js.map`);
+					// @ts-ignore
+					importMap.imports[`/${ fileName }`] = `/${ fileObj.fileName }`;
+
+					debugger
+					// 重新生成sourceMap资源
+					this.emitFile({
+						// @ts-ignore
+						fileName: fileObj.sourcemapFileName,
+						name: undefined,
+						source: JSON.stringify(fileObj.map),
+						// @ts-ignore
+						needsCodeReference: false,
+						type: 'asset',
+					});
+				}
+			});
 			this.emitFile({
 				type: 'asset',
 				source: JSON.stringify(importMap),
@@ -65,16 +62,6 @@ export const importMapPatcherPlugin = ({
 	let importsMapString = '{"imports":{}}'; // 插件间共享的数据
 	return {
 		name: 'import-map-patcher-plugin',
-		generateBundle(outputOpts, bundle) {
-			// @ts-ignore
-			const importsJSONString = bundle['import-map.json']?.source;
-			importsMapString = importsJSONString?.replaceAll('./', '/');
-			// this.emitFile({
-			//   type: 'asset',
-			//   fileName: 'index.html',
-			//   source: indexTpl(importsJSONStringNew, '/assets/js/index.js')
-			// });
-		},
 		transformIndexHtml: (html) => {
 			if (!htmlReplacer) {
 				// @ts-ignore
