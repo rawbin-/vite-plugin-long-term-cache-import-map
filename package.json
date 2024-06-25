@@ -1,5 +1,5 @@
 {
-  "version": "0.1.2",
+  "version": "0.2.0",
   "name": "vite-plugin-long-term-cache-import-map",
   "description": "vite plugin for long term cache by importmap",
   "main": "./dist/index.js",
