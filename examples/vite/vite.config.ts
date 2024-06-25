@@ -18,6 +18,7 @@ export default defineConfig({
         }),
     ],
     build: {
+        sourcemap:true,
         rollupOptions: {
             output: {
                 chunkFileNames: `${staticDir}/js/[name].js`, // 这里要不带hash，避免文件中都有hash

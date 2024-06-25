@@ -11,7 +11,7 @@ export const importMapGeneratorPlugin = ():Plugin => {
 			hashObj.update(code);
 			const contentHash = chunk.fileName.replace(
 				/\.js$/,
-				`-${ hashObj.digest('hex').slice(0, 8) }.js`,
+				`@${ hashObj.digest('hex').slice(0, 8) }.js`,
 			);
 			// @ts-ignore
 			importMap.imports['./' + chunk.fileName] = './' + contentHash;
@@ -25,6 +25,28 @@ export const importMapGeneratorPlugin = ():Plugin => {
 			});
 		},
 		generateBundle(outputOpts, bundle) {
+			// 按上面renderChunk中的规则找到 /path/to/filename-xxyyhash.js
+			const neededJSFile = Object.keys(bundle).filter(fileName => /@\w{8}\.js$/.test(fileName))
+
+			const neededJSFilePrefixMap = neededJSFile.reduce((result, fileName) => {
+				const filePrefix = fileName.replace(/@\w{8}\.js$/, '');
+				// @ts-ignore
+				result[filePrefix] = fileName;
+				return result;
+			}, {})
+			// 算出 /path/to/filename.js.map 的hash
+			const neededJSFilePrefix = Object.keys(neededJSFilePrefixMap);
+
+			// 删除不必要的产物，删除之后会导致css无法加载?!
+			neededJSFilePrefix.map(filePrefix => {
+				delete bundle[`${ filePrefix }.js`];
+			})
+
+			// 修正sourceMap的映射关系
+			neededJSFilePrefix.map(filePrefix => {
+				//@ts-ignore
+				bundle[`${ filePrefix }.js.map`].fileName = `${ neededJSFilePrefixMap[filePrefix] }.map`;
+			})
 			this.emitFile({
 				type: 'asset',
 				source: JSON.stringify(importMap),
