@@ -6,6 +6,11 @@ import {
     importMapPatcherPlugin,
 } from 'vite-plugin-long-term-cache-import-map';
 
+// import {
+//     importMapGeneratorPlugin,
+//     importMapPatcherPlugin,
+// } from '../../src/index';
+
 const staticDir = 'assets';
 
 export default defineConfig({

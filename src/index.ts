@@ -1,6 +1,8 @@
 import { createHash } from 'crypto';
 import {Plugin} from "vite";
 
+const importMapFileName = 'import-map.json'
+
 export const importMapGeneratorPlugin = ():Plugin => {
 	const importMap = {imports: {}};
 	return {
@@ -31,7 +33,6 @@ export const importMapGeneratorPlugin = ():Plugin => {
 					// @ts-ignore
 					importMap.imports[`/${ fileName }`] = `/${ fileObj.fileName }`;
 
-					debugger
 					// 重新生成sourceMap资源
 					this.emitFile({
 						// @ts-ignore
@@ -47,7 +48,7 @@ export const importMapGeneratorPlugin = ():Plugin => {
 			this.emitFile({
 				type: 'asset',
 				source: JSON.stringify(importMap),
-				fileName: 'import-map.json',
+				fileName: importMapFileName,
 			});
 		},
 	};
@@ -59,10 +60,12 @@ export const importMapPatcherPlugin = ({
 	entryPath: string;
 	htmlReplacer?: undefined | null | ((html:string,importsMapString:string) => string);
 }):Plugin => {
-	let importsMapString = '{"imports":{}}'; // 插件间共享的数据
 	return {
 		name: 'import-map-patcher-plugin',
-		transformIndexHtml: (html) => {
+		transformIndexHtml: (html,ctx) => {
+			// @ts-ignore
+			const importsMapString = ctx.bundle?.[importMapFileName]?.source;
+			console.log(importsMapString)
 			if (!htmlReplacer) {
 				// @ts-ignore
 				let newHTML:string = html.replaceAll(/\s*<(script) type="module"[\w\W]*?\1>/g, '');
@@ -70,6 +73,7 @@ export const importMapPatcherPlugin = ({
 				newHTML = newHTML.replace('<head>', `<head><script type="importmap">${ importsMapString }</script><script type="module"> import '${ entryPath }';</script>`);
 				return newHTML;
 			} else if (typeof htmlReplacer === 'function') {
+				// @ts-ignore
 				return htmlReplacer(html, importsMapString);
 			} else {
 				throw new Error('htmlReplacer should return a function to get a string result');
