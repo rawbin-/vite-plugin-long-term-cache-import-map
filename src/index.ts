@@ -8,6 +8,9 @@ export const importMapGeneratorPlugin = ():Plugin => {
 	return {
 		name: 'import-map-generator-plugin',
 		generateBundle(outputOpts, bundle) {
+			if(process.env.NODE_ENV !== 'production') {
+				return
+			}
 			Object.keys(bundle).forEach((fileName) => {
 				const fileObj = bundle[fileName];
 				// 删除默认的map文件 重新生成
