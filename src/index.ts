@@ -80,6 +80,9 @@ export const importMapPatcherPlugin = ({
 	return {
 		name: 'import-map-patcher-plugin',
 		transformIndexHtml: (html,ctx) => {
+			if(process.env.NODE_ENV !== 'production') {
+				return
+			}
 			// @ts-ignore
 			const importsMapString = ctx.bundle?.[importMapFileName]?.source;
 			console.log(importsMapString)

@@ -1,15 +1,15 @@
 import { defineConfig } from "vite"
 import Vue from "@vitejs/plugin-vue"
 import Inspect from 'vite-plugin-inspect'
-import {
-    importMapGeneratorPlugin,
-    importMapPatcherPlugin,
-} from 'vite-plugin-long-term-cache-import-map';
-
 // import {
 //     importMapGeneratorPlugin,
 //     importMapPatcherPlugin,
-// } from '../../src/index';
+// } from 'vite-plugin-long-term-cache-import-map';
+
+import {
+    importMapGeneratorPlugin,
+    importMapPatcherPlugin,
+} from '../../src/index';
 
 const staticDir = 'assets';
 
