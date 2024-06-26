@@ -1,5 +1,5 @@
 {
-  "version": "0.2.3",
+  "version": "0.2.4",
   "name": "vite-plugin-long-term-cache-import-map",
   "description": "vite plugin for long term cache by importmap",
   "main": "./dist/index.js",
@@ -35,7 +35,7 @@
     "play:preview": "pnpm -C examples/vite run preview",
     "play:preview:open": "pnpm -C examples/vite run preview:open",
     "play:preview:host": "pnpm -C examples/vite run preview:host",
-    "publish": "npm run build && npm publish"
+    "prepublish": "pnpm run build"
   },
   "keywords": [
     "vite",

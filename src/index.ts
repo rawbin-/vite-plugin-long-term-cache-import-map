@@ -15,23 +15,40 @@ export const importMapGeneratorPlugin = ():Plugin => {
 					delete bundle[fileName]
 				}
 				if (fileName.endsWith('.js') && fileObj.type === 'chunk') {
-
-
 					const hashObj = createHash('md5');
 					hashObj.update(fileObj.code);
 					const hashStr = hashObj.digest('hex').slice(0, 8)
+					// 带路径
+					const newFileName = fileObj.fileName.replace(/.js$/, `@${ hashStr }.js`);
+					// 带路径
+					const newSourcemapFileName = `${ newFileName }.map`;
+					fileObj.fileName = newFileName;
+
 
 					fileObj.code = fileObj.code.replace(`//# sourceMappingURL=${ fileObj.name }.js.map`, `//# sourceMappingURL=${ fileObj.name }@${ hashStr }.js.map`);
 
-					fileObj.fileName = fileObj.fileName.replace(/.js$/, `@${ hashStr }.js`);
+
 					// @ts-ignore
-					fileObj.preliminaryFileName = fileObj.preliminaryFileName.replace(/.js$/, `@${ hashStr }.js`);
+					fileObj.preliminaryFileName = newFileName;
 					// @ts-ignore
-					fileObj.map.file = fileObj.fileName.replace(/.js$/, `@${ hashStr }.js`);
+					// 只有文件名没有路径
+					fileObj.map.file = fileObj.map.file.replace(/.js$/, `@${ hashStr }.js`);
 					// @ts-ignore
-					fileObj.sourcemapFileName = fileObj.sourcemapFileName.replace(/.js.map$/, `@${ hashStr }.js.map`);
+					// 带路径
+					fileObj.sourcemapFileName = newSourcemapFileName;
 					// @ts-ignore
-					importMap.imports[`/${ fileName }`] = `/${ fileObj.fileName }`;
+					importMap.imports[`/${ fileName }`] = `/${ newFileName }`;
+
+					// 重新带hash的资源文件，代码不被压缩
+					// this.emitFile({
+					//     // @ts-ignore
+					//     fileName: newFileName,
+					//     name: undefined,
+					//     source: fileObj.code,
+					//     // @ts-ignore
+					//     needsCodeReference: false,
+					//     type: 'asset',
+					// });
 
 					// 重新生成sourceMap资源
 					this.emitFile({
